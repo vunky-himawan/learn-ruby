@@ -72,6 +72,8 @@ GEM
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
       uri (>= 0.13.1)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
     base64 (0.3.0)
     bcrypt_pbkdf (1.1.1)
@@ -90,6 +92,9 @@ GEM
       irb (~> 1.10)
       reline (>= 0.3.8)
     dotenv (3.1.8)
+    dotenv-rails (3.1.8)
+      dotenv (= 3.1.8)
+      railties (>= 6.1)
     drb (2.2.3)
     ed25519 (1.4.0)
     erb (5.0.1)
@@ -108,7 +113,13 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    jbuilder (2.13.0)
+      actionview (>= 5.0.0)
+      activesupport (>= 5.0.0)
     json (2.12.2)
+    json-schema (5.1.1)
+      addressable (~> 2.8)
+      bigdecimal (~> 3.1)
     kamal (2.7.0)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -175,6 +186,7 @@ GEM
     psych (5.2.6)
       date
       stringio
+    public_suffix (6.0.2)
     puma (6.6.0)
       nio4r (~> 2.0)
     raabro (1.4.0)
@@ -221,9 +233,29 @@ GEM
     rdoc (6.14.2)
       erb
       psych (>= 4.0.0)
+    redis-client (0.25.0)
+      connection_pool
     regexp_parser (2.10.0)
     reline (0.6.1)
       io-console (~> 0.5)
+    rspec-core (3.13.5)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.4)
+    rswag (2.16.0)
+      rswag-api (= 2.16.0)
+      rswag-specs (= 2.16.0)
+      rswag-ui (= 2.16.0)
+    rswag-api (2.16.0)
+      activesupport (>= 5.2, < 8.1)
+      railties (>= 5.2, < 8.1)
+    rswag-specs (2.16.0)
+      activesupport (>= 5.2, < 8.1)
+      json-schema (>= 2.2, < 6.0)
+      railties (>= 5.2, < 8.1)
+      rspec-core (>= 2.14)
+    rswag-ui (2.16.0)
+      actionpack (>= 5.2, < 8.1)
+      railties (>= 5.2, < 8.1)
     rubocop (1.77.0)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -254,6 +286,12 @@ GEM
       rubocop-rails (>= 2.30)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
+    sidekiq (8.0.5)
+      connection_pool (>= 2.5.0)
+      json (>= 2.9.0)
+      logger (>= 1.6.2)
+      rack (>= 3.1.0)
+      redis-client (>= 0.23.2)
     solid_cable (3.0.11)
       actioncable (>= 7.2)
       activejob (>= 7.2)
@@ -309,11 +347,15 @@ DEPENDENCIES
   bootsnap
   brakeman
   debug
+  dotenv-rails
+  jbuilder
   kamal
   pg (~> 1.1)
   puma (>= 5.0)
   rails (~> 8.0.2)
+  rswag
   rubocop-rails-omakase
+  sidekiq
   solid_cable
   solid_cache
   solid_queue
