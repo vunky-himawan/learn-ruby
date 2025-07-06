@@ -8,6 +8,11 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
       password: "password",
       role_id: @role.id
     }
+    @client_app = Doorkeeper::Application.create!(
+      name: "TestApp",
+      redirect_uri: "urn:ietf:wg:oauth:2.0:oob",
+      scopes: "public"
+    )
   end
 
   test "should register user with valid params" do
@@ -60,5 +65,35 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal [ "Role must exist" ], json_response["errors"]
     assert_equal "Validation failed", json_response["message"]
+  end
+
+  test "should login user with valid credentials" do
+    user = User.create!(@user_params)
+
+    post api_v1_auth_login_url, params: {
+      email: user.email,
+      password: user.password,
+      client_id: @client_app.uid
+    }
+
+    assert_response :success
+    json_response = JSON.parse(response.body)
+    data = json_response["data"]
+    assert data["access_token"].present?
+    assert data["refresh_token"].present?
+    assert_equal 7200, data["expires_in"] # 2 hours in seconds
+  end
+
+  test "should not login with invalid credentials" do
+    post api_v1_auth_login_url, params: {
+      email: "invalid@example.com",
+      password: "wrongpassword",
+      client_id: @client_app.uid
+    }
+
+    assert_response :bad_request
+    json_response = JSON.parse(response.body)
+    assert_equal "Invalid credentials", json_response["message"]
+    assert_equal [ "Email or password is incorrect" ], json_response["errors"]
   end
 end
