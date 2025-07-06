@@ -53,7 +53,6 @@ class OauthFlowsTest < ActionDispatch::IntegrationTest
   private
 
   def create_access_token(user, app)
-    puts "Creating access token for user: app: #{app.id}, user: #{user.id}"
     Doorkeeper::AccessToken.create!(
       application_id: app.id,
       resource_owner_id: user.id,
