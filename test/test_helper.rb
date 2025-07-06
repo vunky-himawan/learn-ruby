@@ -13,3 +13,13 @@ module ActiveSupport
     # Add more helper methods to be used by all tests here...
   end
 end
+
+class ActionDispatch::IntegrationTest
+  setup do
+    host! "localhost"
+  end
+end
+
+def json_response
+  JSON.parse(response.body)
+end
