@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "custom_token_error_response"
-
 Doorkeeper.configure do
   # Change the ORM that doorkeeper will use (requires ORM extensions installed).
   # Check the list of supported ORMs here: https://github.com/doorkeeper-gem/doorkeeper#orms
@@ -9,7 +7,7 @@ Doorkeeper.configure do
 
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_from_credentials do
-    user = User.find_by(email: params[:username])
+    user = User.find_by(email: params[:email])
     user if user&.authenticate(params[:password])
   end
 
@@ -529,5 +527,3 @@ Doorkeeper.configure do
   #
   # realm "Doorkeeper"
 end
-
-Doorkeeper::OAuth::ErrorResponse.send :prepend, CustomTokenErrorResponse

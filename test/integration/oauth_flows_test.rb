@@ -10,7 +10,7 @@ class OauthFlowsTest < ActionDispatch::IntegrationTest
   test "can get access token with valid credentials" do
     post "/oauth/token", params: {
       "grant_type": "password",
-      "username": @user.email,
+      "email": @user.email,
       "password": "password",
       "client_id": @app.uid,
       "client_secret": @app.secret
@@ -25,7 +25,7 @@ class OauthFlowsTest < ActionDispatch::IntegrationTest
   test "cannot get token with invalid password" do
     post "/oauth/token", params: {
       grant_type: "password",
-      username: @user.email,
+      email: @user.email,
       password: "wrongpassword",
       client_id: @app.uid,
       client_secret: @app.secret
@@ -33,8 +33,8 @@ class OauthFlowsTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     body = json_response
-    assert body["status_code"].present?
-    assert_equal 401, body["status_code"]
+    assert body["error"].present?
+    assert_equal "invalid_grant", body["error"]
   end
 
   test "can revoke token" do
