@@ -38,7 +38,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "should not save user with invalid role" do
-    user = User.new(email: "user@example.com", password_digest: "password", role_id: 5)
+    user = User.new(email: "user@example.com", password_digest: "password", role_id: -1)
     assert_not user.save, "Saved the user with an invalid role"
   end
 

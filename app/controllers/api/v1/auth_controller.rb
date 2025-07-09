@@ -2,22 +2,29 @@ class Api::V1::AuthController < ApplicationController
   include Respondable, ActionController::Cookies
 
   def register
-    user_params = params.permit(:email, :password, :name, :role_id)
+    begin
+      user_params = Auth::UserRegistrationRequest.new(params.permit(:email, :password, :role_id).to_h)
 
-    existing_user = User.find_by(email: user_params[:email])
-    if existing_user
-      return bad_request("User already exists with this email", [ "Email already taken" ])
+      user = Auth::UserRegistrationService.new(
+        email: user_params.email,
+        password: user_params.password,
+        role_id: user_params.role_id.to_i
+      ).call
+
+      if user
+        created(user, "User created successfully")
+      else
+        unprocessable_entity("Validation failed", user.errors.full_messages)
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      unprocessable_entity("Validation failed", e.record.errors.full_messages)
+    rescue ActiveRecord::RecordNotFound => e
+      not_found("Resource not found", [ e.message ])
+    rescue StandardError => e
+      puts "Parameters: #{params.inspect}"
+      puts e.message
+      internal_server_error("An unexpected error occurred", [ e.message ])
     end
-
-    user = User.new(user_params)
-
-    if user.save
-      created(user, "User created successfully")
-    else
-      unprocessable_entity("Validation failed", user.errors.full_messages)
-    end
-  rescue StandardError => e
-    internal_server_error("An unexpected error occurred", [ e.message ])
   end
 
   def login

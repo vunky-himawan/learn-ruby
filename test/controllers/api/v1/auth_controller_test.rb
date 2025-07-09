@@ -33,10 +33,10 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
       post api_v1_auth_register_url, params: @user_params
     end
 
-    assert_response :bad_request
+    assert_response :unprocessable_entity
     json_response = JSON.parse(response.body)
-    assert_equal "User already exists with this email", json_response["message"]
-    assert_equal [ "Email already taken" ], json_response["errors"]
+    assert_equal "Validation failed", json_response["message"]
+    assert_equal [ "Email has already been taken" ], json_response["errors"]
   end
 
   test "should not register user without role" do
@@ -49,7 +49,7 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     json_response = JSON.parse(response.body)
 
-    assert_equal [ "Role is required" ], json_response["errors"]
+    assert_equal [ "Role must exist" ], json_response["errors"]
     assert_equal "Validation failed", json_response["message"]
   end
 
