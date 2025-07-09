@@ -90,10 +90,10 @@ class Api::V1::AuthControllerTest < ActionDispatch::IntegrationTest
       client_id: @client_app.uid
     }
 
-    assert_response :bad_request
+    assert_response :unprocessable_entity
     json_response = JSON.parse(response.body)
-    assert_equal "Invalid credentials", json_response["message"]
-    assert_equal "Email or password is incorrect", json_response["errors"]
+    assert_equal "Validation failed", json_response["message"]
+    assert_equal [ "Invalid email or password" ], json_response["errors"]
   end
 
   test "should refresh token with valid refresh_token in cookies" do
