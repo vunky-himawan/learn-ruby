@@ -13,6 +13,9 @@ Rails.application.routes.draw do
       namespace :auth do
         post "register", to: "register"
         post "login", to: "login"
+        get "me", to: "me"
+        post "refresh_token", to: "refresh_token"
+        delete "logout", to: "logout"
       end
     end
   end

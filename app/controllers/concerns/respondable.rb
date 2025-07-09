@@ -57,7 +57,7 @@ module Respondable
     }, status: :forbidden
   end
 
-  def bad_request(message = "Bad Request", errors = [])
+  def bad_request(message = "Bad Request", errors = nil)
     render json: {
       statusCode: 400,
       message: message,
@@ -65,7 +65,7 @@ module Respondable
     }, status: :bad_request
   end
 
-  def conflict(message = "Conflict", errors = [])
+  def conflict(message = "Conflict", errors = nil)
     render json: {
       statusCode: 409,
       message: message,
@@ -80,7 +80,7 @@ module Respondable
     }, status: :internal_server_error
   end
 
-  def unprocessable_entity(message = "Unprocessable Entity", errors = [])
+  def unprocessable_entity(message = "Unprocessable Entity", errors = nil)
     render json: {
       statusCode: 422,
       message: message,
@@ -88,7 +88,7 @@ module Respondable
     }, status: :unprocessable_entity
   end
 
-  def error(message = "An error occurred", status_code = :internal_server_error, errors = [])
+  def error(message = "An error occurred", status_code = :internal_server_error, errors = nil)
     render json: {
       statusCode: Rack::Utils::SYMBOL_TO_STATUS_CODE[status_code],
       message: message,
@@ -118,10 +118,8 @@ module Respondable
       forbidden("Invalid cross-origin request")
     when ActionController::MethodNotAllowed, ActionController::UnknownHttpMethod
       error("Method not allowed", :method_not_allowed)
-    when ActionController::BadRequest, ActionController::InvalidRequest
+    when ActionController::BadRequest
       bad_request("Bad request")
-    when ActionController::ParameterTypeError
-      bad_request("Parameter type error", [ exception.message ])
     else
       internal_server_error("An unexpected error occurred")
     end
