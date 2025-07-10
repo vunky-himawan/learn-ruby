@@ -45,7 +45,6 @@ class Api::V1::AuthController < ApplicationController
     rescue ActiveRecord::RecordNotFound => e
       not_found("Resource not found", [ e.message ])
     rescue StandardError => e
-      puts e.message
       internal_server_error("An unexpected error occurred", [ e.message ])
     end
   end
@@ -77,7 +76,7 @@ class Api::V1::AuthController < ApplicationController
 
   def refresh_token
     begin
-      refresh_token = read_refresh_token
+      refresh_token = read_refresh_token(cookies)
 
       return unauthorized("Please provide a valid refresh token") unless refresh_token
 
@@ -85,20 +84,10 @@ class Api::V1::AuthController < ApplicationController
 
       return bad_request("Invalid refresh token", "Refresh token is invalid or expired") unless token&.refresh_token && token.refresh_token == refresh_token
 
-      unless token.revoked?
-        token.revoke
-        token.save!
-      end
-
-      new_token = Doorkeeper::AccessToken.create(
-        application: token.application,
-        resource_owner_id: token.resource_owner_id,
-        scopes: token.scopes,
-        expires_in: 2.hours,
-        use_refresh_token: true
-      )
-
-      set_refresh_token(new_token.refresh_token)
+      new_token = Auth::RefreshTokenService.new(
+        token: token,
+        cookies: cookies
+      ).call
 
       success({
         access_token: new_token.token,
@@ -112,9 +101,9 @@ class Api::V1::AuthController < ApplicationController
   def logout
     begin
       Auth::UserLogoutService.new(cookies: cookies).call
+
       success(nil, "Logged out successfully")
     rescue StandardError => e
-      puts e.message
       internal_server_error("An unexpected error occurred while logging out", [ e.message ])
     end
   end

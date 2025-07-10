@@ -21,7 +21,7 @@ module TokenHelper
   end
 
   def create_token(user_id, application_id, scopes: "public", expires_in: 2.hours)
-    Doorkeeper::AccessToken.create!(
+    Doorkeeper::AccessToken.create(
       application_id: application_id,
       resource_owner_id: user_id,
       expires_in: expires_in,
