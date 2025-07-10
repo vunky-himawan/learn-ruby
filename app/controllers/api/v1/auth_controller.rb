@@ -11,13 +11,6 @@ class Api::V1::AuthController < ApplicationController
     ).call
 
     created(user, "User created successfully")
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.warn("User registration validation failed: #{e.record.errors.full_messages}")
-    unprocessable_entity("Validation failed", e.record.errors.full_messages)
-  rescue StandardError => e
-    Rails.logger.error("User registration failed: #{e.message}")
-    Rails.logger.error(e.backtrace.join("\n"))
-    internal_server_error("User registration failed")
   end
 
   def login
