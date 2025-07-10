@@ -1,5 +1,5 @@
 class Api::V1::AuthController < ApplicationController
-  include Respondable, ActionController::Cookies, CookieTokenHelper
+  include Respondable, ActionController::Cookies, TokenHelper
 
   def register
     begin
@@ -32,10 +32,9 @@ class Api::V1::AuthController < ApplicationController
       credentials = Auth::UserLoginService.new(
         email: user_params.email,
         password: user_params.password,
-        client_id: user_params.client_id
+        client_id: user_params.client_id,
+        cookies: cookies
       ).call
-
-      set_refresh_token_cookie(credentials.refresh_token, cookies)
 
       success({
         access_token: credentials.token,
@@ -46,6 +45,7 @@ class Api::V1::AuthController < ApplicationController
     rescue ActiveRecord::RecordNotFound => e
       not_found("Resource not found", [ e.message ])
     rescue StandardError => e
+      puts e.message
       internal_server_error("An unexpected error occurred", [ e.message ])
     end
   end
