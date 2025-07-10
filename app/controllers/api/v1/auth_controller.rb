@@ -53,22 +53,13 @@ class Api::V1::AuthController < ApplicationController
     begin
       token_string = request.headers["Authorization"]&.split(" ")&.last
 
-      return unauthorized("Please provide a valid access token") unless token_string
+      result = Auth::GetCurrentUserService.new(token_string: token_string).call
 
-      access_token = Doorkeeper::AccessToken.by_token(token_string)
-
-      return unauthorized("Invalid access token") unless access_token&.accessible?
-
-      user = User.includes(role: :permissions).find(access_token.resource_owner_id)
-
-      return bad_request("User not found", "Associated user not found") unless user
-
-      success({
-        id: user.id,
-        email: user.email,
-        role: user.role.name,
-        permissions: user.role.permissions.map(&:name)
-      }, "User retrieved successfully")
+      success(result, "User retrieved successfully")
+    rescue Auth::UnauthorizedError => e
+      unauthorized(e.message)
+    rescue Auth::NotFoundError => e
+      bad_request("User not found", e.message)
     rescue StandardError => e
       internal_server_error("An unexpected error occurred while retrieving user", [ e.message ])
     end
