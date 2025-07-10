@@ -110,21 +110,12 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def logout
-    refresh_token = read_refresh_token
-
-    cookies.delete(:refresh_token, secure: Rails.env.production?, same_site: :strict)
-
-    if refresh_token
-      token = Doorkeeper::AccessToken.by_refresh_token(refresh_token)
-      token&.revoke
+    begin
+      Auth::UserLogoutService.new(cookies: cookies).call
+      success(nil, "Logged out successfully")
+    rescue StandardError => e
+      puts e.message
+      internal_server_error("An unexpected error occurred while logging out", [ e.message ])
     end
-
-    success(nil, "Logged out successfully")
-  end
-
-  private
-
-  def read_refresh_token
-    Rails.env.production? ? cookies.encrypted[:refresh_token] : cookies[:refresh_token]
   end
 end

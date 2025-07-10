@@ -29,4 +29,11 @@ module TokenHelper
       use_refresh_token: true
     )
   end
+
+  def revoke_token(token)
+    return unless token
+
+    token.revoke
+    token.save!
+  end
 end
