@@ -2,12 +2,19 @@ module Auth
   class RefreshTokenService
     include TokenHelper
 
-    def initialize(token:, cookies:)
-      @token = token
+    def initialize(cookies:)
       @cookies = cookies
     end
 
     def call
+      refresh_token = read_refresh_token(cookies)
+
+      raise Errors::UnauthorizedError, "Please provide a valid refresh token" unless refresh_token
+
+      token = Doorkeeper::AccessToken.by_refresh_token(refresh_token)
+
+      raise Errors::BadRequestError, "Invalid refresh token" unless token&.refresh_token && token.refresh_token == refresh_token
+
       revoke_token(token)
 
       new_token = create_token(
@@ -23,6 +30,6 @@ module Auth
 
     private
 
-    attr_reader :token, :cookies
+    attr_reader :cookies
   end
 end

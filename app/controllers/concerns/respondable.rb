@@ -102,24 +102,36 @@ module Respondable
     Rails.logger.error("\n[#{exception.class}] #{exception.message}\n#{exception.backtrace.join("\n")}")
 
     case exception
+    when Errors::UnauthorizedError
+      Rails.logger.warn("Unauthorized: #{exception.message}")
+      unauthorized(exception.message)
+    when Errors::NotFoundError
+      Rails.logger.warn("Not Found: #{exception.message}")
+      not_found(exception.message)
+    when Errors::BadRequestError
+      Rails.logger.warn("Bad Request: #{exception.message}")
+      bad_request(exception.message)
     when ActiveRecord::RecordNotFound
+      Rails.logger.warn("Record Not Found: #{exception.message}")
       not_found(exception.message)
     when ActiveRecord::RecordInvalid
-      bad_request("Invalid record", exception.record.errors.full_messages)
-    when ActionController::ParameterMissing
-      bad_request("Required parameter missing", [ exception.param ])
+      Rails.logger.warn("Record Invalid: #{exception.message}")
+      unprocessable_entity("Validation failed", exception.record.errors.full_messages)
     when ActionController::RoutingError
+      Rails.logger.warn("Routing Error: #{exception.message}")
       not_found("Route not found")
     when ActionController::UnknownFormat
+      Rails.logger.warn("Unknown Format: #{exception.message}")
       not_found("Unknown format requested")
     when ActionController::InvalidAuthenticityToken
+      Rails.logger.warn("Invalid Authenticity Token: #{exception.message}")
       unauthorized("Invalid authenticity token")
     when ActionController::InvalidCrossOriginRequest
+      Rails.logger.warn("Invalid Cross-Origin Request: #{exception.message}")
       forbidden("Invalid cross-origin request")
     when ActionController::MethodNotAllowed, ActionController::UnknownHttpMethod
+      Rails.logger.warn("Method Not Allowed: #{exception.message}")
       error("Method not allowed", :method_not_allowed)
-    when ActionController::BadRequest
-      bad_request("Bad request")
     else
       internal_server_error("An unexpected error occurred")
     end

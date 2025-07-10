@@ -2,100 +2,66 @@ class Api::V1::AuthController < ApplicationController
   include Respondable, ActionController::Cookies, TokenHelper
 
   def register
-    begin
-      user_params = Auth::UserRegistrationRequest.new(params.permit(:email, :password, :role_id).to_h)
+    user_params = Auth::UserRegistrationRequest.new(params.permit(:email, :password, :role_id).to_h)
 
-      user = Auth::UserRegistrationService.new(
-        email: user_params.email,
-        password: user_params.password,
-        role_id: user_params.role_id.to_i
-      ).call
+    user = Auth::UserRegistrationService.new(
+      email: user_params.email,
+      password: user_params.password,
+      role_id: user_params.role_id.to_i
+    ).call
 
-      created(user, "User created successfully")
-    rescue ActiveRecord::RecordInvalid => e
-      unprocessable_entity("Validation failed", e.record.errors.full_messages)
-    rescue ActiveRecord::RecordNotFound => e
-      not_found("Resource not found", [ e.message ])
-    rescue StandardError => e
-      internal_server_error("An unexpected error occurred", [ e.message ])
-    end
+    created(user, "User created successfully")
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.warn("User registration validation failed: #{e.record.errors.full_messages}")
+    unprocessable_entity("Validation failed", e.record.errors.full_messages)
+  rescue StandardError => e
+    Rails.logger.error("User registration failed: #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
+    internal_server_error("User registration failed")
   end
 
   def login
-    begin
-      user_params = Auth::UserLoginRequest.new(params.permit(:email, :password, :client_id).to_h)
+    user_params = Auth::UserLoginRequest.new(params.permit(:email, :password, :client_id).to_h)
 
-      unless user_params.valid?
-        return unprocessable_entity("Validation failed", user_params.errors.full_messages)
-      end
-
-      credentials = Auth::UserLoginService.new(
-        email: user_params.email,
-        password: user_params.password,
-        client_id: user_params.client_id,
-        cookies: cookies
-      ).call
-
-      success({
-        access_token: credentials.token,
-        expires_in: credentials.expires_in
-      }, "Login successful")
-    rescue ActiveRecord::RecordInvalid => e
-      unprocessable_entity("Validation failed", e.record.errors.full_messages)
-    rescue ActiveRecord::RecordNotFound => e
-      not_found("Resource not found", [ e.message ])
-    rescue StandardError => e
-      internal_server_error("An unexpected error occurred", [ e.message ])
+    unless user_params.valid?
+      return unprocessable_entity("Validation failed", user_params.errors.full_messages)
     end
+
+    credentials = Auth::UserLoginService.new(
+      email: user_params.email,
+      password: user_params.password,
+      client_id: user_params.client_id,
+      cookies: cookies
+    ).call
+
+    success({
+      access_token: credentials.token,
+      expires_in: credentials.expires_in
+    }, "Login successful")
   end
 
   def me
-    begin
-      token_string = request.headers["Authorization"]&.split(" ")&.last
+    token_string = request.headers["Authorization"]&.split(" ")&.last
 
-      result = Auth::GetCurrentUserService.new(token_string: token_string).call
+    result = Auth::GetCurrentUserService.new(token_string: token_string).call
 
-      success(result, "User retrieved successfully")
-    rescue Auth::UnauthorizedError => e
-      unauthorized(e.message)
-    rescue Auth::NotFoundError => e
-      bad_request("User not found", e.message)
-    rescue StandardError => e
-      internal_server_error("An unexpected error occurred while retrieving user", [ e.message ])
-    end
+    success(result, "User retrieved successfully")
   end
 
   def refresh_token
-    begin
-      refresh_token = read_refresh_token(cookies)
+    new_token = Auth::RefreshTokenService.new(
+      cookies: cookies
+    ).call
 
-      return unauthorized("Please provide a valid refresh token") unless refresh_token
-
-      token = Doorkeeper::AccessToken.by_refresh_token(refresh_token)
-
-      return bad_request("Invalid refresh token", "Refresh token is invalid or expired") unless token&.refresh_token && token.refresh_token == refresh_token
-
-      new_token = Auth::RefreshTokenService.new(
-        token: token,
-        cookies: cookies
-      ).call
-
-      success({
-        access_token: new_token.token,
-        expires_in: new_token.expires_in
-      }, "Access token refreshed successfully")
-    rescue StandardError => e
-      internal_server_error("An unexpected error occurred while refreshing token", [ e.message ])
-    end
+    success({
+      access_token: new_token.token,
+      expires_in: new_token.expires_in
+    }, "Access token refreshed successfully")
   end
 
   def logout
-    begin
-      Auth::UserLogoutService.new(cookies: cookies).call
+    Auth::UserLogoutService.new(cookies: cookies).call
 
-      success(nil, "Logged out successfully")
-    rescue StandardError => e
-      internal_server_error("An unexpected error occurred while logging out", [ e.message ])
-    end
+    success(nil, "Logged out successfully")
   end
 end

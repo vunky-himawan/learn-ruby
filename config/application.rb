@@ -31,5 +31,6 @@ module UserManagementApi
     config.autoload_paths << Rails.root.join("lib")
     config.eager_load_paths << Rails.root.join("app/services")
     config.eager_load_paths << Rails.root.join("app/requests")
+    config.eager_load_paths << Rails.root.join("app/errors")
   end
 end
