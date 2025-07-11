@@ -4,6 +4,10 @@ class Api::V1::AuthController < ApplicationController
   def register
     user_params = Auth::UserRegistrationRequest.new(params.permit(:email, :password, :role_id).to_h)
 
+    unless user_params.valid?
+      return unprocessable_entity("Validation failed", user_params.errors.full_messages)
+    end
+
     user = Auth::UserRegistrationService.new(
       email: user_params.email,
       password: user_params.password,
