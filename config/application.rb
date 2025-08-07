@@ -6,7 +6,7 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module LibraryManagementSystemApi
+module Simero
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
@@ -28,5 +28,8 @@ module LibraryManagementSystemApi
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # Custom directories with classes and modules you want to be autoloadable.
+    config.autoload_paths << Rails.root.join("lib")
   end
 end

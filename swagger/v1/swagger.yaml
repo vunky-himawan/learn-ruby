@@ -1,0 +1,51 @@
+---
+openapi: 3.0.1
+info:
+  title: SIMERO API
+  version: v1
+paths:
+  "/api/v1/auth/register":
+    post:
+      summary: Register a new user
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '201':
+          description: User created successfully
+        '422':
+          description: User couldn't be created successfully
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              - email
+              - password
+              - password_confirmation
+              - role_id
+              properties:
+                user:
+                  name:
+                    type: string
+                    example: John Doe
+                  email:
+                    type: string
+                    format: email
+                    example: john.doe@example.com
+                  password:
+                    type: string
+                    example: password123
+                  password_confirmation:
+                    type: string
+                    example: password123
+                  role_id:
+                    type: integer
+                    example: 1
+servers:
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: www.example.com
