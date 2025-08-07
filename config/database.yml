@@ -18,14 +18,14 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: <%= ENV.fetch("DB_USERNAME") { "task_api" } %>
-  password: <%= ENV.fetch("DB_PASSWORD") { "" } %>
-  host: <%= ENV.fetch("DB_HOST") { "localhost" } %>
-  port: <%= ENV.fetch("DB_PORT") { 5432 } %>
+  username: <%= ENV.fetch("POSTGRES_USERNAME") { "task_api" } %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD") { "" } %>
+  host: <%= ENV.fetch("POSTGRES_HOST") { "localhost" } %>
+  port: <%= ENV.fetch("POSTGRES_PORT") { 5432 } %>
 
 development:
   <<: *default
-  database: library_management_system_api_development
+  database: <%= ENV.fetch("POSTGRES_DB") %>_development
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
@@ -59,7 +59,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: library_management_system_api_test
+  database: <%= ENV.fetch("POSTGRES_DB") %>_test
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -84,18 +84,18 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: library_management_system_api_production
-    username: library_management_system_api
-    password: <%= ENV["LIBRARY_MANAGEMENT_SYSTEM_API_DATABASE_PASSWORD"] %>
+    database: <%= ENV.fetch("POSTGRES_DB") %>_production
+    username: <%= ENV.fetch("POSTGRES_USERNAME") %>
+    password: <%= ENV["POSTGRES_PASSWORD"] %>
   cache:
     <<: *primary_production
-    database: library_management_system_api_production_cache
+    database: <%= ENV.fetch("POSTGRES_DB") %>_production_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: library_management_system_api_production_queue
+    database: <%= ENV.fetch("POSTGRES_DB") %>_production_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: library_management_system_api_production_cable
+    database: <%= ENV.fetch("POSTGRES_DB") %>_production_cable
     migrations_paths: db/cable_migrate
