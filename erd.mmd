@@ -1,0 +1,40 @@
+erDiagram
+    users {
+        string id
+        string email
+        string name
+        string password
+        int role_id
+
+        date created_at
+        date updated_at
+        date deleted_at
+    } 
+
+    roles {
+        int id
+        string name
+        string description
+
+        date created_at
+        date updated_at
+        date deleted_at
+    }
+
+    permissions {
+        int id
+        string name
+    }
+
+    role_has_permissions {
+        int role_id
+        int permission_id
+
+        date created_at
+        date updated_at
+    }
+
+    %% Relationships
+    users ||--o{ roles : has
+    roles ||--o{ role_has_permissions : has
+    permissions ||--o{ role_has_permissions : grants
