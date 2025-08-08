@@ -10,18 +10,12 @@ RSpec.describe User, type: :model do
 
     it { should validate_presence_of(:name) }
     it { should validate_presence_of(:role) }
-  end
-
-  describe 'Devise modules' do
-    it 'includes Devise modules' do
-      expect(User.devise_modules).to include(
-        :database_authenticatable,
-        :registerable,
-        :recoverable,
-        :rememberable,
-        :validatable,
-        :jwt_authenticatable
-      )
-    end
+    it { should validate_presence_of(:email) }
+    it { should validate_presence_of(:password) }
+    it { should validate_confirmation_of(:password) }
+    it { should validate_length_of(:password).is_at_least(8) }
+    it { should validate_uniqueness_of(:email) }
+    it { should allow_value("john.doe@example.com").for(:email) }
+    it { should_not allow_value("invalid_email").for(:email) }
   end
 end

@@ -57,19 +57,17 @@ module Respondable
     }, status: :forbidden
   end
 
-  def bad_request(message = "Bad Request", errors = nil)
+  def bad_request(message = "Bad Request")
     render json: {
       statusCode: 400,
-      message: message,
-      errors: errors
+      message: message
     }, status: :bad_request
   end
 
-  def conflict(message = "Conflict", errors = nil)
+  def conflict(message = "Conflict")
     render json: {
       statusCode: 409,
-      message: message,
-      errors: errors
+      message: message
     }, status: :conflict
   end
 
@@ -80,13 +78,16 @@ module Respondable
     }, status: :internal_server_error
   end
 
-  def unprocessable_entity(message = "Unprocessable Entity", details = nil)
+  def unprocessable_entity(message = nil, resource = nil)
     res = {
       statusCode: 422,
-      message: message
+      message: message.presence || "Validation failed"
     }
 
-    res[:details] = details if details
+    if resource && resource.respond_to?(:errors) && resource.errors.any?
+      res[:errors] = format_validation_details(resource)
+      res[:message] = resource.errors.full_messages.join(", ") if message.blank?
+    end
 
     render json: res, status: :unprocessable_entity
   end
@@ -137,6 +138,15 @@ module Respondable
       error("Method not allowed", :method_not_allowed)
     else
       internal_server_error("An unexpected error occurred")
+    end
+  end
+
+  def format_validation_details(resource)
+    resource.errors.map do |error|
+      {
+        attribute: error.attribute.to_s,
+        error: error.message
+      }
     end
   end
 end

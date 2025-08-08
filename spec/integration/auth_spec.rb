@@ -1,7 +1,7 @@
 require "swagger_helper"
 
 RSpec.describe "Auth API", type: :request, swagger_doc: "v1/swagger.yaml" do
-  path "/api/v1/auth/register" do
+  path "/api/v1/auth/sign_up" do
     post("Register a new user") do
       tags "Auth"
       consumes "application/json"
@@ -11,13 +11,11 @@ RSpec.describe "Auth API", type: :request, swagger_doc: "v1/swagger.yaml" do
         type: :object,
         required: [ :name, :email, :password, :password_confirmation, :role_id ],
         properties: {
-          user: {
             name: { type: :string, example: "John Doe" },
             email: { type: :string, format: "email", example: "john.doe@example.com" },
             password: { type: :string, example: "password123" },
             password_confirmation: { type: :string, example: "password123" },
             role_id: { type: :integer, example: 1 }
-          }
         }
       }
 
@@ -26,13 +24,24 @@ RSpec.describe "Auth API", type: :request, swagger_doc: "v1/swagger.yaml" do
 
         let(:user) do
           {
-            user: {
               name: "John Doe",
               email: "john.doe@example.com",
               password: "password123",
               password_confirmation: "password123",
               role_id: role.id
-            }
+          }
+        end
+
+        run_test!
+      end
+
+      response(400, "User couldn't be created successfully") do
+        let(:user) do
+          {
+              name: "422 John Doe",
+              email: "john.doe@example.com",
+              password: "password123",
+              password_confirmation: "password123"
           }
         end
 
@@ -42,13 +51,11 @@ RSpec.describe "Auth API", type: :request, swagger_doc: "v1/swagger.yaml" do
       response(422, "User couldn't be created successfully") do
         let(:user) do
           {
-            user: {
               name: "422 John Doe",
               email: "john.doe@example.com",
               password: "password123",
               password_confirmation: "password123",
-              role_id: nil
-            }
+              role_id: -10
           }
         end
 
