@@ -91,7 +91,6 @@ module Api
             Rails.logger.error "User sign in validation error: #{e.message}"
             unprocessable_entity("Validation failed")
           rescue StandardError => e
-            puts "Unexpected error during user sign in: #{e.message}"
             Rails.logger.error "Unexpected error during user sign in: #{e.message}"
             internal_server_error("Something went wrong")
           end
