@@ -63,4 +63,63 @@ RSpec.describe "Auth API", type: :request, swagger_doc: "v1/swagger.yaml" do
       end
     end
   end
+
+  path "/api/v1/auth/sign_in" do
+    post ("Sign in a user") do
+      tags "Auth"
+      consumes "application/json"
+      produces "application/json"
+
+      parameter name: :auth, in: :body, schema: {
+        type: :object,
+        required: [ :email, :password ],
+        properties: {
+          email: { type: :string, format: "email", example: "john.doe@example.com" },
+          password: { type: :string, example: "password123" }
+        }
+      }
+
+      response(200, "User signed in successfully") do
+        let!(:role) { create(:role) }
+        let!(:user) { create(:user, role: role, email: "john.doe@example.com", password: "password123") }
+        let(:password) { "password123" }
+
+        let(:auth) do
+          {
+            email: user.email,
+            password: password
+          }
+        end
+
+        run_test!
+      end
+
+      response(401, "Invalid email or password") do
+        let!(:role) { create(:role) }
+        let!(:user) { create(:user, role: role, email: "john.doe@example.com", password: "password123") }
+
+        let(:auth) do
+          {
+            email: user.email,
+            password: "wrongpassword"
+          }
+        end
+
+        run_test!
+      end
+
+      response(400, "Missing email or password") do
+        let!(:role) { create(:role) }
+        let!(:user) { create(:user, role: role, email: "john.doe@example.com", password: "password123") }
+
+        let(:auth) do
+          {
+            email: user.email
+          }
+        end
+
+        run_test!
+      end
+    end
+  end
 end
