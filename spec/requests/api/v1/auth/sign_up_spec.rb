@@ -10,8 +10,6 @@ RSpec.describe "Registrations API", type: :request do
 
       post api_v1_auth_sign_up_path, params: valid_attributes, as: :json
 
-      puts "Response body: #{response.body}"
-
       expect(response).to have_http_status(201)
 
       json = JSON.parse(response.body)

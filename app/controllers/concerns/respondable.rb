@@ -89,7 +89,7 @@ module Respondable
       res[:message] = resource.errors.full_messages.join(", ") if message.blank?
     end
 
-    render json: res, status: :unprocessable_entity
+    render json: res, status: :unprocessable_content
   end
 
   def error(message = "An error occurred", status_code = :internal_server_error, errors = nil)

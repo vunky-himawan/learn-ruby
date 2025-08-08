@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       namespace :auth do
         post "sign_up", to: "auth#sign_up"
+        post "sign_in", to: "auth#sign_in"
       end
     end
   end
