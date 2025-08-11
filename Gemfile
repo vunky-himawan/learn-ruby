@@ -56,7 +56,7 @@ group :development, :test do
   gem "shoulda-matchers"
 end
 
-gem 'jwt'
+gem "jwt"
 
 gem "pundit", "~> 2.5"
 

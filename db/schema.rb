@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_07_094751) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_11_041713) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,11 +34,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_07_094751) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "role_has_permissions", id: false, force: :cascade do |t|
+  create_table "role_has_permissions", force: :cascade do |t|
     t.bigint "role_id", null: false
     t.bigint "permission_id", null: false
-    t.index ["permission_id", "role_id"], name: "index_role_has_permissions_on_permission_id_and_role_id"
-    t.index ["role_id", "permission_id"], name: "index_role_has_permissions_on_role_id_and_permission_id"
+    t.index ["permission_id"], name: "index_role_has_permissions_on_permission_id"
+    t.index ["role_id", "permission_id"], name: "index_role_has_permissions_on_role_id_and_permission_id", unique: true
+    t.index ["role_id"], name: "index_role_has_permissions_on_role_id"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -74,5 +75,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_07_094751) do
   end
 
   add_foreign_key "refresh_tokens", "users"
+  add_foreign_key "role_has_permissions", "permissions"
+  add_foreign_key "role_has_permissions", "roles"
   add_foreign_key "users", "roles"
 end
